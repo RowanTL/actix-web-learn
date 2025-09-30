@@ -20,6 +20,7 @@
           buildInputs = [
             openssl
             pkg-config
+            watchexec
             (rust-bin.stable.latest.default.override {
               extensions = [
                 "rust-src"
