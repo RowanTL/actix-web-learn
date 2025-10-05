@@ -190,6 +190,7 @@ name = "actix-web-learn"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "derive_more",
  "futures",
  "serde",
  "serde_json",
