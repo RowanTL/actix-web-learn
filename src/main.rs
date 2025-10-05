@@ -1,24 +1,33 @@
-use actix_web::{App, HttpServer, web};
-use std::sync::Mutex;
+use actix_web::{App, HttpResponse, HttpServer, web};
 
-#[derive(Clone)]
-struct ArbitraryBullShit {
-    bullshit: usize,
+// this function could be located in a different module
+fn scoped_config(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::resource("/test")
+            .route(web::get().to(|| async { HttpResponse::Ok().body("test") }))
+            .route(web::head().to(HttpResponse::MethodNotAllowed)),
+    );
 }
 
-async fn index(data: web::Data<ArbitraryBullShit>) -> String {
-    format!("Request number: {}\n", data.bullshit) // <- response with count
+// this function could be located in a different module
+fn config(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::resource("/app")
+            .route(web::get().to(|| async { HttpResponse::Ok().body("app") }))
+            .route(web::head().to(HttpResponse::MethodNotAllowed)),
+    );
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let bs = web::Data::new(ArbitraryBullShit { bullshit: 1 });
-
-    HttpServer::new(move || {
-        // move counter into the closure
+    HttpServer::new(|| {
         App::new()
-            .app_data(bs.clone()) // <- register the created data
-            .route("/", web::get().to(index))
+            .configure(config)
+            .service(web::scope("/api").configure(scoped_config))
+            .route(
+                "/",
+                web::get().to(|| async { HttpResponse::Ok().body("/") }),
+            )
     })
     .bind(("127.0.0.1", 8080))?
     .run()
