@@ -6,6 +6,7 @@ use actix_web::{
 };
 use serde::Deserialize;
 use std::fs;
+use tokio::fs::File;
 
 #[derive(Debug, Deserialize)]
 struct Metadata {
@@ -36,7 +37,8 @@ pub async fn post_video(form: MultipartForm<UploadForm>) -> HttpResponse {
             match File::create(&file_path).await {
                 Ok(mut dest_file) => {
                     // We need to read the data from the file in the multipart form and write it to the destination file
-                    let mut file_stream = file.as_file();
+                    let mut file_stream =
+                        tokio::fs::File::from_std(file.as_file().try_clone().unwrap());
 
                     // Copy data from the multipart stream to the file on disk
                     match tokio::io::copy(&mut file_stream, &mut dest_file).await {
@@ -57,14 +59,15 @@ pub async fn post_video(form: MultipartForm<UploadForm>) -> HttpResponse {
                     return HttpResponse::new(StatusCode::from_u16(500).unwrap());
                 }
             }
-        //     return HttpResponse::Ok()
-        //         .content_type(ContentType::plaintext())
-        //         .body(format!(
-        //             "Uploaded file {}, with size: {}",
-        //             form.json.name, form.file.size
-        //         ));
-        // }
-    };
+            //     return HttpResponse::Ok()
+            //         .content_type(ContentType::plaintext())
+            //         .body(format!(
+            //             "Uploaded file {}, with size: {}",
+            //             form.json.name, form.file.size
+            //         ));
+            // }
+        }
+    }
 }
 
 #[actix_web::main]
