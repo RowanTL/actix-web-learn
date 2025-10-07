@@ -15,7 +15,9 @@ struct UploadForm {
 }
 
 #[post("/videos")]
-pub async fn post_video(MultipartForm(form): MultipartForm<UploadForm>) -> impl Responder {
+// pub async fn post_video(MultipartForm(form): MultipartForm<UploadForm>) -> impl Responder {
+pub async fn post_video(form: MultipartForm<UploadForm>) -> impl Responder {
+    println!("{}", form.json.name);
     format!(
         "Uploaded file {}, with size: {}",
         form.json.name, form.file.size
