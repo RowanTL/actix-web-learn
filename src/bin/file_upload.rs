@@ -21,7 +21,6 @@ struct UploadForm {
 }
 
 #[post("/videos")]
-// pub async fn post_video(MultipartForm(form): MultipartForm<UploadForm>) -> impl Responder {
 pub async fn post_video(form: MultipartForm<UploadForm>) -> HttpResponse {
     println!("{}", form.json.name);
     let mut dir_builder: fs::DirBuilder = fs::DirBuilder::new();
